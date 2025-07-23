@@ -8,17 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showingAlert = true
+    @State private var showingWinnerRoleQuestion = true
     @State private var isPlayingWinner = true
+    @State private var randomNumber = Int.random(in: 0..<3)
+    @State private var round = 0
+    @State private var userScore = 0
+    @State private var opponentScore = 0
+    @State private var showingScore = false
 
-    private let elements = ["👊", "🖐️", "✌️"]
-
-    var botChoice: String {
-        elements.randomElement() ?? "👊"
-    }
-    @State private var userChoice = ""
-    @State private var botPoint = 0
-    @State private var userPoint = 0
+    let elements = ["👊", "🖐️", "✌️"]
 
     var body: some View {
         ZStack {
@@ -27,9 +25,9 @@ struct ContentView: View {
 
             VStack(spacing: 50) {
                 HStack(alignment: .top) {
-                    Text("You: \(userPoint)")
+                    Text("You: \(userScore)")
                     Spacer()
-                    Text("Game: \(botPoint)")
+                    Text("Game: \(opponentScore)")
                 }
                 .padding()
                 Spacer()
@@ -38,7 +36,7 @@ struct ContentView: View {
                     Text("Bot Choice")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                    Text(botChoice)
+                    Text(elements[randomNumber])
                         .font(.system(size: 100))
                 }
 
@@ -47,7 +45,20 @@ struct ContentView: View {
                     HStack {
                         ForEach(elements, id: \.self) { element in
                             Button(element) {
-                                userChoice = element
+                                addPoint(
+                                    userChoice: element,
+                                    elements[randomNumber],
+                                    isPlayingWinner
+                                )
+
+                                round += 1
+
+                                if round == 10 {
+                                    showingScore = true
+                                }
+
+                                randomNumber = Int.random(in: 0..<3)
+                                showingWinnerRoleQuestion = true
                             }
                             .font(.largeTitle)
                         }
@@ -57,7 +68,7 @@ struct ContentView: View {
                 Spacer()
             }
         }
-        .alert("What do you want ?", isPresented: $showingAlert) {
+        .alert("You want to", isPresented: $showingWinnerRoleQuestion) {
             Button("Win") {
                 isPlayingWinner = true
             }
@@ -65,6 +76,90 @@ struct ContentView: View {
                 isPlayingWinner = false
             }
         }
+        .alert("Your Score", isPresented: $showingScore) {
+            Button("Ok") { resetGame() }
+        } message: {
+            Text("\(userScore)/10")
+        }
+    }
+
+    func addPoint(userChoice: String, _ botChoice: String, _ isWinner: Bool) {
+        if isWinner {
+            if userChoice == "👊" {
+                if botChoice == "🖐️" {
+                    opponentScore += 1
+                    return
+                }
+                if botChoice == "👊" { return }
+                
+                userScore += 1
+                return
+            }
+            
+            if userChoice == "🖐️" {
+                if botChoice == "✌️" {
+                    opponentScore += 1
+                    return
+                }
+                if botChoice == "🖐️" { return }
+                
+                userScore += 1
+                return
+            }
+            
+            if userChoice == "✌️" {
+                if botChoice == "👊" {
+                    opponentScore += 1
+                    return
+                }
+                if botChoice == "✌️" { return }
+                
+                userScore += 1
+                return
+            }
+        }
+        
+        if !isWinner {
+            if botChoice == "👊" {
+                if userChoice == "🖐️" {
+                    opponentScore += 1
+                    return
+                }
+                if userChoice == "👊" { return }
+                
+                userScore += 1
+                return
+            }
+            
+            if botChoice == "🖐️" {
+                if userChoice == "✌️" {
+                    opponentScore += 1
+                    return
+                }
+                if userChoice == "🖐️" { return }
+                
+                userScore += 1
+                return
+            }
+            
+            if botChoice == "✌️" {
+                if userChoice == "👊" {
+                    opponentScore += 1
+                    return
+                }
+                if userChoice == "✌️" { return }
+                
+                userScore += 1
+                return
+            }
+        }
+    }
+
+    func resetGame() {
+        round = 0
+        userScore = 0
+        opponentScore = 0
+        showingWinnerRoleQuestion = true
     }
 }
 
